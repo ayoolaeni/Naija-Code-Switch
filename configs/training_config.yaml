@@ -1,0 +1,30 @@
+# LoRA/QLoRA hyperparameters (README §5.4). Tune on the validation split
+# only -- never on data/splits/test.jsonl.
+
+model:
+  # One of the three README §5.1 candidate families. Swap freely for the
+  # baseline_probe.py comparison; this is the default for train_lora.py.
+  base_model_id: "Qwen/Qwen2.5-1.5B-Instruct"
+  # Set true to load the base model in 4-bit (QLoRA) -- the memory-
+  # constrained fallback. Requires a CUDA GPU + bitsandbytes.
+  use_qlora: false
+
+lora:
+  r: 16                 # LoRA rank, README range 8-32
+  alpha: 32              # ~2x rank
+  dropout: 0.05
+  target_modules: ["q_proj", "v_proj"]  # attention Q/V projections
+
+training:
+  learning_rate: 2.0e-4  # README range 1e-4 - 2e-4
+  per_device_train_batch_size: 1
+  gradient_accumulation_steps: 8
+  num_train_epochs: 4    # README range 3-5, with early stopping
+  early_stopping_patience: 2
+  max_seq_length: 1024
+  seed: 42
+  output_dir: "checkpoints/naija-switch-lora"
+
+data:
+  train_path: "data/splits/train.jsonl"
+  val_path: "data/splits/val.jsonl"

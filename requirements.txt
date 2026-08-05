@@ -1,0 +1,29 @@
+# Core ML / adaptation
+torch>=2.2
+transformers>=4.42
+peft>=0.11
+accelerate>=0.31
+bitsandbytes>=0.43 ; platform_system == "Linux"
+datasets>=2.19
+huggingface_hub>=0.23
+sentencepiece>=0.2
+
+# Evaluation
+sacrebleu>=2.4
+bert-score>=0.3.13
+scipy>=1.11
+statsmodels>=0.14
+krippendorff>=0.6
+
+# Data handling
+pandas>=2.1
+numpy>=1.26
+pyyaml>=6.0
+
+# App / interface
+streamlit>=1.35
+# starlette>=1.4 changed GZipResponder's constructor (added a required
+# `thread_minimum_size` kwarg) without streamlit's bundled gzip middleware
+# being updated for it -- every request 500s. Pin below that break.
+starlette<1.4
+python-dotenv>=1.0

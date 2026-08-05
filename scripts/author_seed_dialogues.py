@@ -1,0 +1,300 @@
+"""
+One-off script that materializes the hand-authored seed dataset into
+data/authored/dialogues.jsonl.
+
+The dialogues below are written by hand (not templated/generated) to satisfy
+README §6.3: natural English-Pidgin code-switching, mid-clause switch points,
+unnormalized spelling across "contributors" (we vary spelling on purpose,
+e.g. "abeg"/"abeg na", "una"/"unu"), >=4 turns, spanning the four in-scope
+domains. This is a small seed corpus (not the target 3,000-5,000 turns) meant
+to make every downstream pipeline stage runnable end-to-end today.
+
+Run: python scripts/author_seed_dialogues.py
+"""
+import json
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+OUT_PATH = ROOT / "data" / "authored" / "dialogues.jsonl"
+
+# domain in {"greetings", "qa", "customer_support", "everyday_chat"}
+DIALOGUES = [
+    # ---------------- greetings ----------------
+    {
+        "id": "greet_001", "domain": "greetings", "contributor": "c1",
+        "turns": [
+            {"speaker": "user", "text": "How far! Wetin dey happen?"},
+            {"speaker": "assistant", "text": "I dey o, thank God. How you dey?"},
+            {"speaker": "user", "text": "I dey fine, just dey manage this Lagos traffic."},
+            {"speaker": "assistant", "text": "Ah, Lagos traffic no be beans. Take am easy, e go better."},
+        ],
+    },
+    {
+        "id": "greet_002", "domain": "greetings", "contributor": "c2",
+        "turns": [
+            {"speaker": "user", "text": "Good morning, how was your night?"},
+            {"speaker": "assistant", "text": "Good morning o! Night was fine, I sleep well well."},
+            {"speaker": "user", "text": "Nice one. I never even close eye small, work don tire me."},
+            {"speaker": "assistant", "text": "Sorry o, make you try rest today if you fit."},
+        ],
+    },
+    {
+        "id": "greet_003", "domain": "greetings", "contributor": "c1",
+        "turns": [
+            {"speaker": "user", "text": "Abeg good afternoon, you dey there?"},
+            {"speaker": "assistant", "text": "Good afternoon! Yes na, I dey here, how I fit help you today?"},
+            {"speaker": "user", "text": "Nothing serious, I just wan greet you small."},
+            {"speaker": "assistant", "text": "Haha okay o, I appreciate am. Enjoy your day!"},
+        ],
+    },
+    {
+        "id": "greet_004", "domain": "greetings", "contributor": "c3",
+        "turns": [
+            {"speaker": "user", "text": "Oya good evening, hope say the day treat you well?"},
+            {"speaker": "assistant", "text": "Good evening! The day treat me fine, thank you for asking."},
+            {"speaker": "user", "text": "That na good news, tomorrow better pass today abeg."},
+            {"speaker": "assistant", "text": "Amen! We go take am one day at a time."},
+        ],
+    },
+    {
+        "id": "greet_005", "domain": "greetings", "contributor": "c2",
+        "turns": [
+            {"speaker": "user", "text": "Long time! How you and the family dey?"},
+            {"speaker": "assistant", "text": "Everybody dey alright, thank God for that. And you sef?"},
+            {"speaker": "user", "text": "We dey manage, small small things dey happen but we thank God."},
+            {"speaker": "assistant", "text": "That's good to hear. E go better for all of us."},
+        ],
+    },
+    {
+        "id": "greet_006", "domain": "greetings", "contributor": "c4",
+        "turns": [
+            {"speaker": "user", "text": "Happy new week o, hope say weekend was sweet."},
+            {"speaker": "assistant", "text": "Happy new week to you too! Weekend was quiet, I just rest."},
+            {"speaker": "user", "text": "That's the best kind of weekend sometimes, no wahala at all."},
+            {"speaker": "assistant", "text": "Exactly, sometimes rest na the real gist."},
+        ],
+    },
+    {
+        "id": "greet_007", "domain": "greetings", "contributor": "c1",
+        "turns": [
+            {"speaker": "user", "text": "Hi, nice to meet you, wetin be your name?"},
+            {"speaker": "assistant", "text": "Nice to meet you too! You fit call me Naija-Switch assistant."},
+            {"speaker": "user", "text": "Okay o, I go dey call you that then. Thank you for the chat."},
+            {"speaker": "assistant", "text": "No wahala at all, I dey here whenever you need me."},
+        ],
+    },
+    # ---------------- qa ----------------
+    {
+        "id": "qa_001", "domain": "qa", "contributor": "c2",
+        "turns": [
+            {"speaker": "user", "text": "Abeg wetin be the capital of Nigeria?"},
+            {"speaker": "assistant", "text": "The capital of Nigeria na Abuja. Lagos used to be the capital before, but dem move am go Abuja for 1991."},
+            {"speaker": "user", "text": "Ehen, I never sabi say Lagos used to be capital before o."},
+            {"speaker": "assistant", "text": "Yes na, many people no know that history sometimes."},
+        ],
+    },
+    {
+        "id": "qa_002", "domain": "qa", "contributor": "c3",
+        "turns": [
+            {"speaker": "user", "text": "How many states dey Nigeria altogether?"},
+            {"speaker": "assistant", "text": "Nigeria get 36 states plus the Federal Capital Territory wey be Abuja."},
+            {"speaker": "user", "text": "36 states, that one plenty o. Which one be the smallest?"},
+            {"speaker": "assistant", "text": "By land size, Lagos State na the smallest, but e still get plenty people well well."},
+        ],
+    },
+    {
+        "id": "qa_003", "domain": "qa", "contributor": "c1",
+        "turns": [
+            {"speaker": "user", "text": "I wan sabi, why sky dey blue for daytime?"},
+            {"speaker": "assistant", "text": "E dey happen because of wetin dem call Rayleigh scattering — sunlight dey scatter for the air, and blue light dey scatter pass the other colors, na so we dey see blue sky."},
+            {"speaker": "user", "text": "Ehen, so na the air dey cause am, not the ocean reflect am?"},
+            {"speaker": "assistant", "text": "Correct, the ocean reflection na small factor, but the main reason na how the atmosphere dey scatter light."},
+        ],
+    },
+    {
+        "id": "qa_004", "domain": "qa", "contributor": "c4",
+        "turns": [
+            {"speaker": "user", "text": "Wetin dey cause inflation for economy generally?"},
+            {"speaker": "assistant", "text": "Inflation fit happen when demand pass supply, when cost of production go up, or when government print too much money."},
+            {"speaker": "user", "text": "Okay, so if naira dey lose value, na that one dey cause am too?"},
+            {"speaker": "assistant", "text": "Yes, when currency dey depreciate, imported goods go cost more, and that one go push inflation up too."},
+        ],
+    },
+    {
+        "id": "qa_005", "domain": "qa", "contributor": "c2",
+        "turns": [
+            {"speaker": "user", "text": "Abeg how many minutes dey inside one hour?"},
+            {"speaker": "assistant", "text": "One hour get sixty minutes."},
+            {"speaker": "user", "text": "And how many hours dey inside one day?"},
+            {"speaker": "assistant", "text": "One day get twenty-four hours in total."},
+        ],
+    },
+    {
+        "id": "qa_006", "domain": "qa", "contributor": "c3",
+        "turns": [
+            {"speaker": "user", "text": "Please, who dey referred to as the father of computer science?"},
+            {"speaker": "assistant", "text": "Many people dey call Alan Turing the father of computer science because of the work wey him do on computation theory."},
+            {"speaker": "user", "text": "I hear say na him also crack some code during the war, na true?"},
+            {"speaker": "assistant", "text": "Yes o, na him lead team wey break the Enigma code during World War II."},
+        ],
+    },
+    {
+        "id": "qa_007", "domain": "qa", "contributor": "c4",
+        "turns": [
+            {"speaker": "user", "text": "How I fit take improve my English writing skill?"},
+            {"speaker": "assistant", "text": "You fit start by reading plenty, writing small small everyday, and asking people to check your work give you feedback."},
+            {"speaker": "user", "text": "Make sense, na consistency dey matter pass shortcut."},
+            {"speaker": "assistant", "text": "Exactly, small daily practice dey beat one big push wey you no follow up."},
+        ],
+    },
+    # ---------------- customer_support ----------------
+    {
+        "id": "cs_001", "domain": "customer_support", "contributor": "c1",
+        "turns": [
+            {"speaker": "user", "text": "Good day, my account balance no dey show correct, abeg help me check am."},
+            {"speaker": "assistant", "text": "Good day! Sorry for the wahala. Abeg send me your account number so I fit check wetin dey happen."},
+            {"speaker": "user", "text": "Okay, the number na 0123456789, e don pain me since morning."},
+            {"speaker": "assistant", "text": "I don see am. E fit be say the last transaction never fully update. Give me small time to confirm and I go update you."},
+        ],
+    },
+    {
+        "id": "cs_002", "domain": "customer_support", "contributor": "c2",
+        "turns": [
+            {"speaker": "user", "text": "I don try reset my password like five times, e no dey work at all."},
+            {"speaker": "assistant", "text": "I dey sorry about that. Make we try am together — you dey get any error message when you try am?"},
+            {"speaker": "user", "text": "Yes, e dey talk say 'link expired' anytime I click the reset link."},
+            {"speaker": "assistant", "text": "Ah okay, that link dey expire fast. Make I send you fresh one now, use am within 10 minutes."},
+        ],
+    },
+    {
+        "id": "cs_003", "domain": "customer_support", "contributor": "c3",
+        "turns": [
+            {"speaker": "user", "text": "Abeg my order never arrive, na since last week I order am."},
+            {"speaker": "assistant", "text": "I sorry for the delay o. Fit you give me the order number make I track am?"},
+            {"speaker": "user", "text": "Order number na ORD-4521, delivery address na Ikeja."},
+            {"speaker": "assistant", "text": "Thank you. I don check am, e dey with the delivery rider now, e suppose land your side before evening."},
+        ],
+    },
+    {
+        "id": "cs_004", "domain": "customer_support", "contributor": "c4",
+        "turns": [
+            {"speaker": "user", "text": "Dem charge me twice for the same transaction, wetin dey happen?"},
+            {"speaker": "assistant", "text": "That no suppose happen, sorry about that. Abeg send the two transaction reference numbers make I compare them."},
+            {"speaker": "user", "text": "Okay make I check my alert, hold on small."},
+            {"speaker": "assistant", "text": "No wahala, take your time, I dey here."},
+        ],
+    },
+    {
+        "id": "cs_005", "domain": "customer_support", "contributor": "c1",
+        "turns": [
+            {"speaker": "user", "text": "I wan cancel my subscription, how I go do am?"},
+            {"speaker": "assistant", "text": "I fit help you with that. You wan cancel am immediately or after this current billing cycle end?"},
+            {"speaker": "user", "text": "Make e end after this cycle, no wahala."},
+            {"speaker": "assistant", "text": "Understood, I don set am so your subscription go stop after this cycle finish. You go still enjoy access till then."},
+        ],
+    },
+    {
+        "id": "cs_006", "domain": "customer_support", "contributor": "c2",
+        "turns": [
+            {"speaker": "user", "text": "The app dey crash anytime I try upload picture."},
+            {"speaker": "assistant", "text": "Sorry about that. Which type of phone you dey use, and which version of the app?"},
+            {"speaker": "user", "text": "I dey use Android, app version na 3.2.1."},
+            {"speaker": "assistant", "text": "Okay, that version get known bug with picture upload. Abeg update to version 3.2.4, e don fix am."},
+        ],
+    },
+    {
+        "id": "cs_007", "domain": "customer_support", "contributor": "c3",
+        "turns": [
+            {"speaker": "user", "text": "I no dey receive the OTP code when I wan login."},
+            {"speaker": "assistant", "text": "Let's sort that out. Na SMS or email you dey expect the OTP?"},
+            {"speaker": "user", "text": "Na SMS, my phone number no change since."},
+            {"speaker": "assistant", "text": "Alright, sometimes network delay dey cause am. Make I resend am now, check your message after two minutes."},
+        ],
+    },
+    # ---------------- everyday_chat ----------------
+    {
+        "id": "chat_001", "domain": "everyday_chat", "contributor": "c1",
+        "turns": [
+            {"speaker": "user", "text": "I don tire today sha, work just dey plenty."},
+            {"speaker": "assistant", "text": "Sorry o, e go better. Make you rest small when you close today."},
+            {"speaker": "user", "text": "I go try, but the deadline no dey gree me rest."},
+            {"speaker": "assistant", "text": "I understand, just make sure you no over-stress yourself, health first."},
+        ],
+    },
+    {
+        "id": "chat_002", "domain": "everyday_chat", "contributor": "c2",
+        "turns": [
+            {"speaker": "user", "text": "Guess wetin, I finally finish that project wey dey worry me since."},
+            {"speaker": "assistant", "text": "Ah, congratulations! You don try well well, how you dey feel now?"},
+            {"speaker": "user", "text": "I dey feel relieved o, like say heavy load comot for my head."},
+            {"speaker": "assistant", "text": "That's the spirit! Make sure you celebrate small for yourself."},
+        ],
+    },
+    {
+        "id": "chat_003", "domain": "everyday_chat", "contributor": "c3",
+        "turns": [
+            {"speaker": "user", "text": "Abeg make we continue tomorrow, I don tire small small."},
+            {"speaker": "assistant", "text": "No wahala, we go continue tomorrow. Go rest well."},
+            {"speaker": "user", "text": "Thank you, you sef take am easy."},
+            {"speaker": "assistant", "text": "I go try, good night when you sleep!"},
+        ],
+    },
+    {
+        "id": "chat_004", "domain": "everyday_chat", "contributor": "c4",
+        "turns": [
+            {"speaker": "user", "text": "Rain don dey fall since morning, I no even fit comot house."},
+            {"speaker": "assistant", "text": "Ehyah, at least e go make the weather cool small. You get anything to keep you busy indoors?"},
+            {"speaker": "user", "text": "I dey watch film small small, nothing serious."},
+            {"speaker": "assistant", "text": "That's not bad at all, enjoy the rest, the rain go soon stop."},
+        ],
+    },
+    {
+        "id": "chat_005", "domain": "everyday_chat", "contributor": "c1",
+        "turns": [
+            {"speaker": "user", "text": "My guy, I don dey plan small trip go my village this December."},
+            {"speaker": "assistant", "text": "Nice one! Which village, and you don plan wetin you go do there?"},
+            {"speaker": "user", "text": "Na Anambra side, I just wan see my grandma and rest small."},
+            {"speaker": "assistant", "text": "That sounds lovely, family time dey always sweet. I hope you enjoy the trip."},
+        ],
+    },
+    {
+        "id": "chat_006", "domain": "everyday_chat", "contributor": "c2",
+        "turns": [
+            {"speaker": "user", "text": "I don tire to dey cook everyday, I wan try something new."},
+            {"speaker": "assistant", "text": "Haha I understand, wetin be some food wey you never try before?"},
+            {"speaker": "user", "text": "Maybe I go try make small jollof pasta, mix am up small."},
+            {"speaker": "assistant", "text": "That sounds interesting, abeg tell me how e turn out when you try am."},
+        ],
+    },
+    {
+        "id": "chat_007", "domain": "everyday_chat", "contributor": "c3",
+        "turns": [
+            {"speaker": "user", "text": "See ehn, NEPA don take light since afternoon, I dey vex small."},
+            {"speaker": "assistant", "text": "Ah that one dey pain well well. You get generator or you just dey manage with phone light?"},
+            {"speaker": "user", "text": "I dey manage with my phone torch for now, generator fuel don finish."},
+            {"speaker": "assistant", "text": "E go be like say light go soon return, just hold on small."},
+        ],
+    },
+    {
+        "id": "chat_008", "domain": "everyday_chat", "contributor": "c4",
+        "turns": [
+            {"speaker": "user", "text": "I wan start dey exercise small every morning, I dey too dey sit down for laptop."},
+            {"speaker": "assistant", "text": "That's a good decision! Even ten minutes of stretching or walking every morning fit make big difference."},
+            {"speaker": "user", "text": "True talk, make I try am from tomorrow, no more excuse."},
+            {"speaker": "assistant", "text": "I dey support you, start small and stay consistent, that's the key."},
+        ],
+    },
+]
+
+
+def main():
+    OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    with OUT_PATH.open("w", encoding="utf-8") as f:
+        for d in DIALOGUES:
+            assert len(d["turns"]) >= 4, f"{d['id']} has fewer than 4 turns"
+            f.write(json.dumps(d, ensure_ascii=False) + "\n")
+    print(f"Wrote {len(DIALOGUES)} dialogues to {OUT_PATH}")
+
+
+if __name__ == "__main__":
+    main()

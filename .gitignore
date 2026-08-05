@@ -1,0 +1,14 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+logs/conversations/*.jsonl
+logs/human_eval/*.jsonl
+logs/comparisons/*.json
+data/processed/**
+!data/processed/.gitkeep
+data/splits/**
+!data/splits/.gitkeep
+checkpoints/
+*.egg-info/
+.ipynb_checkpoints/
