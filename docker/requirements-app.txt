@@ -1,0 +1,11 @@
+# Runtime deps for the chat app ONLY (src/app/*), targeting the mock and
+# hosted (HF Inference API) backends -- no local GPU inference. Deliberately
+# excludes torch/transformers/peft/bitsandbytes: those are only needed for
+# src/modeling/train_lora.py and INFERENCE_BACKEND=local, neither of which
+# this image runs. Keeps the client's image small and the build fast.
+streamlit>=1.35
+# starlette>=1.4 broke streamlit's bundled gzip middleware (every request
+# 500s) -- see requirements.txt for the same pin and the full explanation.
+starlette<1.4
+huggingface_hub>=0.23
+python-dotenv>=1.0

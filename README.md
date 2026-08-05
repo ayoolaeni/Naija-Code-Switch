@@ -20,7 +20,42 @@ cp .env.example .env            # then fill in HF_TOKEN to get live chat respons
 without a supported GPU, `train_lora.py` automatically falls back to full
 precision (see "Scope of this build" below).
 
-## Run it
+## Running the chat app with Docker (recommended for handing this to someone else)
+
+The chat app (`src/app/ui.py`) is packaged as its own Docker image, separate
+from the full research environment above -- it only needs `streamlit`,
+`huggingface_hub`, and `python-dotenv` (no `torch`/`transformers`/`peft`, no
+GPU), so the image is small and builds fast. This is the easiest way for
+someone without Python installed to run the app.
+
+**One-time setup (whoever is running it):**
+1. Install [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+   and make sure it's running.
+2. From the project folder:
+   ```bash
+   docker compose up -d --build
+   ```
+3. Open http://localhost:8501 in a browser.
+
+That's it -- no `.env` file is required. With none present, the app runs on
+the deterministic `MockBackend` (see "Scope of this build" below), which
+proves the whole app works but doesn't call a real language model.
+
+**For live model responses:** copy `.env.example` to `.env` in the project
+folder and set `HF_TOKEN` (a free token from
+https://huggingface.co/settings/tokens), then re-run
+`docker compose up -d --build`. `docker compose` reads `.env` automatically;
+nothing needs to be rebuilt into the image, and the token is never baked
+into the image or committed to git.
+
+**Day to day, after the first build:**
+```bash
+docker compose up -d      # start
+docker compose down       # stop
+docker compose logs -f    # view logs
+```
+
+## Run it (without Docker, for development)
 
 ```bash
 # 1. Data pipeline: load sources -> filter -> privacy-strip -> CMI-score

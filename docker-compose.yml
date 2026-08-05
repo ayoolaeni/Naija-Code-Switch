@@ -1,0 +1,15 @@
+services:
+  naija-switch:
+    build: .
+    ports:
+      - "8501:8501"
+    # docker compose reads a `.env` file next to this one automatically for
+    # the ${...} substitutions below -- it's optional. With no .env at all,
+    # every value below falls back to empty/default and the app runs fine
+    # on the mock backend. Copy .env.example to .env and fill HF_TOKEN for
+    # live responses.
+    environment:
+      - HF_TOKEN=${HF_TOKEN:-}
+      - INFERENCE_BACKEND=${INFERENCE_BACKEND:-}
+      - INFERENCE_MODEL_ID=${INFERENCE_MODEL_ID:-Qwen/Qwen2.5-7B-Instruct}
+    restart: unless-stopped
