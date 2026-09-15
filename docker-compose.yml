@@ -4,12 +4,21 @@ services:
     ports:
       - "8501:8501"
     # docker compose reads a `.env` file next to this one automatically for
-    # the ${...} substitutions below -- it's optional. With no .env at all,
-    # every value below falls back to empty/default and the app runs fine
-    # on the mock backend. Copy .env.example to .env and fill HF_TOKEN for
-    # live responses.
+    # the ${...} substitutions below -- it's optional. Defaults below
+    # already run the real fine-tuned model (INFERENCE_BACKEND=local baked
+    # into the Dockerfile); no .env or HF_TOKEN needed for that. Override
+    # here only to switch to the hosted API backend instead (set
+    # INFERENCE_BACKEND=hf and HF_TOKEN in a local .env).
     environment:
       - HF_TOKEN=${HF_TOKEN:-}
-      - INFERENCE_BACKEND=${INFERENCE_BACKEND:-}
+      - INFERENCE_BACKEND=${INFERENCE_BACKEND:-local}
       - INFERENCE_MODEL_ID=${INFERENCE_MODEL_ID:-Qwen/Qwen2.5-7B-Instruct}
+    volumes:
+      # Persists the downloaded base model (~3GB) across container
+      # restarts -- without this it re-downloads every time the container
+      # is recreated (e.g. after `docker compose down`).
+      - hf-cache:/app/.cache/huggingface
     restart: unless-stopped
+
+volumes:
+  hf-cache:

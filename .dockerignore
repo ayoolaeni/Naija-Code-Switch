@@ -3,7 +3,12 @@
 .claude
 __pycache__
 *.pyc
-checkpoints
+# The trained adapter is the one thing under checkpoints/ we DO want in
+# the build context (see Dockerfile) -- ignore everything else there
+# (any stray checkpoint-*/ training-state subfolders, other run outputs).
+checkpoints/*
+!checkpoints/naija-switch-lora
+checkpoints/naija-switch-lora/checkpoint-*
 logs
 notebooks
 scripts

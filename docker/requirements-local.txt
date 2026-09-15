@@ -1,0 +1,20 @@
+# Runtime deps for the chat app running the REAL fine-tuned model locally
+# inside the container (INFERENCE_BACKEND=local) -- for client handoffs
+# where the point is to actually demo the fine-tuned adapter, not just the
+# wired-up UI. Heavier than docker/requirements-app.txt (that one
+# deliberately excludes torch/transformers/peft for a small mock/hf-only
+# demo image); this one needs them since generation happens in-container.
+#
+# torch itself is installed separately first, in its own Dockerfile layer
+# -- see docker/requirements-local-torch.txt.
+transformers>=4.42
+peft>=0.11
+accelerate>=0.31
+sentencepiece>=0.2
+
+streamlit>=1.35
+# starlette>=1.4 broke streamlit's bundled gzip middleware (every request
+# 500s) -- see requirements.txt for the same pin and the full explanation.
+starlette<1.4
+huggingface_hub>=0.23
+python-dotenv>=1.0

@@ -1,0 +1,4 @@
+# Shell scripts must keep LF line endings regardless of platform -- a
+# CRLF-converted shebang line ("#!/bin/sh\r") fails with "bad interpreter"
+# when the script runs inside a Linux container (see docker/entrypoint.sh).
+*.sh text eol=lf

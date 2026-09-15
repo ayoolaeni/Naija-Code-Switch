@@ -22,11 +22,24 @@ precision (see "Scope of this build" below).
 
 ## Running the chat app with Docker (recommended for handing this to someone else)
 
-The chat app (`src/app/ui.py`) is packaged as its own Docker image, separate
-from the full research environment above -- it only needs `streamlit`,
-`huggingface_hub`, and `python-dotenv` (no `torch`/`transformers`/`peft`, no
-GPU), so the image is small and builds fast. This is the easiest way for
-someone without Python installed to run the app.
+The chat app (`src/app/ui.py`) is packaged as its own Docker image -- this
+is the easiest way for someone without Python installed to run it,
+including the actual fine-tuned model (see `HOW_TO_RUN.txt` for a
+plain-language version of these same steps written for a non-technical
+recipient of a zipped copy of this project).
+
+**This image bakes in `torch`/`transformers`/`peft` and the trained LoRA
+adapter under `checkpoints/naija-switch-lora/`**, and defaults to
+`INFERENCE_BACKEND=local` -- no `.env` or `HF_TOKEN` needed to see real,
+fine-tuned responses out of the box. Trade-off: the image is a few GB
+(CPU-only `torch` build, since a client machine isn't assumed to have a
+GPU set up for Docker) and generation runs on CPU -- correct, but tens of
+seconds to a couple of minutes per reply, not instant. If `checkpoints/
+naija-switch-lora/` doesn't exist when building (e.g. you haven't
+fine-tuned yet -- see "Fine-tuning on a free cloud GPU" above), the build
+will fail at the `COPY checkpoints/naija-switch-lora` step; fine-tune
+first, or edit the Dockerfile to drop that line and default to `mock`/`hf`
+instead.
 
 **One-time setup (whoever is running it):**
 1. Install [Docker Desktop](https://www.docker.com/products/docker-desktop/)
@@ -35,18 +48,19 @@ someone without Python installed to run the app.
    ```bash
    docker compose up -d --build
    ```
+   First build downloads the base image, `torch`, `transformers`, etc., and
+   on first actual use also downloads the ~3GB base model from Hugging
+   Face (cached in a named Docker volume afterward, so this only happens
+   once) -- expect this to take a while on a normal connection.
 3. Open http://localhost:8501 in a browser.
 
-That's it -- no `.env` file is required. With none present, the app runs on
-the deterministic `MockBackend` (see "Scope of this build" below), which
-proves the whole app works but doesn't call a real language model.
-
-**For live model responses:** copy `.env.example` to `.env` in the project
-folder and set `HF_TOKEN` (a free token from
-https://huggingface.co/settings/tokens), then re-run
-`docker compose up -d --build`. `docker compose` reads `.env` automatically;
-nothing needs to be rebuilt into the image, and the token is never baked
-into the image or committed to git.
+**To use the hosted API backend instead** (fast, but does *not* use your
+fine-tuned adapter -- only the unfine-tuned base model): copy
+`.env.example` to `.env`, set `HF_TOKEN` (a free token from
+https://huggingface.co/settings/tokens) and `INFERENCE_BACKEND=hf`, then
+re-run `docker compose up -d --build`. `docker compose` reads `.env`
+automatically; the token is never baked into the image or committed to
+git.
 
 **Day to day, after the first build:**
 ```bash

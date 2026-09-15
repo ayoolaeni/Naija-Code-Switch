@@ -1,0 +1,9 @@
+# Installed first, in its own Dockerfile layer -- by far the largest
+# download, so isolating it means a retry after a network hiccup doesn't
+# have to redownload it again if this layer already succeeded.
+#
+# CPU-only wheel: client machines aren't assumed to have a GPU (or Docker
+# set up to pass one through), and this app already runs fine on CPU, just
+# slower -- the CPU wheel is ~10x smaller than the default CUDA build.
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch>=2.2
