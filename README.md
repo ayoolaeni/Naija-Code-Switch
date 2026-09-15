@@ -73,6 +73,8 @@ python -m src.modeling.prompt_design        # prints the frozen system prompt
 # 4. LoRA/QLoRA fine-tuning
 python -m src.modeling.train_lora --smoke-test               # proves the training code path works, CPU, seconds
 python -m src.modeling.train_lora --config configs/training_config.yaml   # real run, needs a GPU
+# No local GPU? See "Fine-tuning on a free cloud GPU" below for ready-to-run
+# Colab/Kaggle notebooks that do this same real run on free hardware.
 
 # 5. Evaluation harness
 python -m src.evaluation.automatic_metrics   # BLEU / BERTScore / chrF demo
@@ -83,11 +85,99 @@ streamlit run src/evaluation/human_eval_app.py     # rate the outputs of the com
 streamlit run src/app/ui.py
 ```
 
+## Fine-tuning on a free cloud GPU (Colab / Kaggle)
+
+`train_lora.py --config configs/training_config.yaml` needs a CUDA GPU to
+run against the real base model (Qwen2.5-1.5B-Instruct) -- most laptops
+don't have one. Two ready-to-run notebooks do the exact same real run on
+free hosted GPUs, no local setup beyond a browser:
+
+- `notebooks/finetune_colab.ipynb` -- upload to
+  [colab.research.google.com](https://colab.research.google.com),
+  `Runtime -> Change runtime type -> T4 GPU`, then `Runtime -> Run all`.
+  Colab's free GPU quota is a tighter rolling daily-ish limit.
+- `notebooks/finetune_kaggle.ipynb` -- upload to
+  [kaggle.com](https://www.kaggle.com) (`Code -> New Notebook -> File ->
+  Import Notebook`), verify your account by phone once
+  (`Settings -> Phone Verification` -- required for GPU/internet access,
+  no payment involved), then in the notebook's Settings panel set
+  **Accelerator -> GPU T4 x2** and **Internet -> On**, then `Run -> Run
+  All`. Kaggle's free quota is weekly (~30 GPU-hours), which tends to be
+  more forgiving than Colab's.
+
+Both notebooks: clone this repo fresh, install dependencies, regenerate
+`data/processed/`+`data/splits/` from the committed `data/authored/*.jsonl`
+sources (those derived files are gitignored -- a fresh clone never has
+them), run the CPU smoke test, then run the real fine-tune, and finally
+get the trained adapter off the cloud machine (Colab: auto-downloads a zip
+via the browser; Kaggle: zips it into `/kaggle/working/` where you download
+it from the file browser panel or, more reliably, from the **Output** tab
+after `Save Version -> Save & Run All`).
+
+**Known gotchas already fixed in both notebooks** (worth knowing if you
+hit a variant of them):
+- Both platforms' base images can ship an old `torchao` that newer `peft`
+  versions hard-error on when injecting LoRA layers, even though this
+  project never uses `torchao` at all -- both notebooks `pip uninstall`
+  it right after installing requirements.
+- `train_lora.py`'s post-training overfitting-reproduction check used to
+  build inputs on CPU and pass them straight to a GPU model, crashing with
+  a device-mismatch error on any real GPU run -- fixed in
+  `_check_verbatim_reproduction()`.
+- `save_strategy="epoch"` with no cap kept a full checkpoint (adapter
+  weights **and** optimizer/scheduler state) per epoch on disk --
+  `save_total_limit=1` now caps that, and both notebooks' zip step copies
+  only the top-level adapter files (skipping any `checkpoint-*/`
+  subfolder) so the downloaded zip is a few MB, not 100+ MB of training
+  state you don't need for inference.
+
+## Running the chat app against a real fine-tuned adapter
+
+Once you have a trained adapter (from a local run or one of the notebooks
+above), extract just its top-level files (`adapter_config.json`,
+`adapter_model.safetensors`, tokenizer files -- not any `checkpoint-*/`
+subfolder) into `checkpoints/naija-switch-lora/` (this path is gitignored,
+so it's local-only; nothing here gets pushed to GitHub). Then set, in
+`.env`:
+
+```
+INFERENCE_BACKEND=local
+LOCAL_BASE_MODEL_ID=Qwen/Qwen2.5-1.5B-Instruct
+LOCAL_LORA_ADAPTER_DIR=checkpoints/naija-switch-lora
+```
+
+Run `streamlit run src/app/ui.py` and the sidebar should read **"Active:
+local_transformers"**. Two gotchas that cost real debugging time getting
+this working, in case they resurface:
+
+- **Always launch via this project's own venv, not a bare `streamlit`
+  command.** `streamlit` on your system `PATH` can silently resolve to a
+  *different*, unrelated Python install (e.g. a global one with
+  `streamlit`/`torch`/`transformers` but no `peft`), which either crashes
+  oddly or behaves inconsistently with what's documented here. Use
+  `.venv\Scripts\streamlit.exe run src\app\ui.py` (PowerShell) /
+  `.venv/Scripts/streamlit.exe run src/app/ui.py` (Git Bash), or activate
+  the venv first.
+- **No GPU means slow, not broken.** CPU generation for a 1.5B model
+  routinely takes tens of seconds to a couple of minutes per reply. A long
+  spinner is expected; it is not evidence something is wrong.
+
+(Under the hood: `src/app/inference_engine.py` loads `.env` via an
+explicit path derived from `Path(__file__)`, not python-dotenv's default
+"walk up from the caller's file" search -- that default search breaks
+under `streamlit run` specifically, because Streamlit executes the app
+script through its own `exec` mechanism rather than a normal import, so
+the default heuristic silently finds no `.env` and loads nothing, with no
+error. If you ever see the sidebar say `mock` despite a correctly-set
+`.env`, this is the first thing to suspect.)
+
 ## Repository layout
 
 Matches the research brief's §9 structure: `data/` (raw/authored/processed/splits),
 `src/data_pipeline`, `src/annotation`, `src/modeling`, `src/evaluation`,
-`src/app`, `configs/`, `logs/`.
+`src/app`, `configs/`, `logs/`. `notebooks/` holds the Colab/Kaggle
+fine-tuning notebooks described above (not part of the brief's original
+structure, added for free-GPU access).
 
 ## Scope of this build
 
@@ -133,9 +223,16 @@ infrastructure:
 - `train_lora.py` is a real `transformers` + `peft` LoRA/QLoRA script. Its
   `--smoke-test` flag swaps in a tiny public model so the full training
   loop (LoRA injection, tokenization, loss masking, the overfitting
-  verbatim-reproduction check) is verified correct on CPU in seconds.
-  Running it for real against Llama 3 / Qwen2.5 / Gemma 2 needs a CUDA GPU
-  and the multi-GB base model weights.
+  verbatim-reproduction check) is verified correct on CPU in seconds. A
+  real run against Qwen2.5-1.5B-Instruct needs a CUDA GPU and the
+  multi-GB base model weights -- this has since actually been done (not
+  just proven runnable) on a free Kaggle T4 GPU via
+  `notebooks/finetune_kaggle.ipynb`, producing a real trained LoRA
+  adapter loadable by the chat app's `local` backend (see "Running the
+  chat app against a real fine-tuned adapter" above). That adapter itself
+  isn't committed to this repo (`checkpoints/` is gitignored, since it's a
+  local build artifact, not source) -- re-run the notebook to reproduce
+  it.
 - The chat app's default backend is a deterministic `MockBackend` so the
   UI, dialogue manager (with context truncation), and logging are
   verifiably working with **zero configuration**. Add `HF_TOKEN` to `.env`
