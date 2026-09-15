@@ -7,18 +7,48 @@ Nigerian Pidgin. Everything it needs is already included in this folder --
 you do not need to install Python, download any model separately, or set
 anything up beyond the one program below.
 
+BEFORE YOU START -- please read this bit
+--------------------------------------------------------
+- You do not need to understand any of the technical words below. Just
+  follow the steps in order, one at a time.
+- At a couple of points, a black or dark window with white text will
+  open and scroll very fast. This is completely normal -- it looks like
+  something out of a movie, but it is not a virus and nothing is wrong.
+  Do not close it; just let it keep running.
+- The very first time you set this up, it will take a while and involve
+  some waiting. That is expected. After this first time, it becomes fast.
+- Wherever you see a command in a box like this:
+
+      docker compose up -d --build
+
+  copy and paste that exact line rather than typing it by hand, to avoid
+  small typing mistakes. (Paste into a terminal window with Ctrl+V on
+  Windows, or Cmd+V on Mac.)
+
 
 STEP 1 -- Install Docker Desktop (one-time only)
 --------------------------------------------------------
 Docker is the program that runs the chatbot for you.
 
 1. Go to: https://www.docker.com/products/docker-desktop/
-2. Download and install Docker Desktop for your computer (Windows or Mac).
-3. Open Docker Desktop after installing it, and leave it running in the
-   background. You'll see a whale icon in your system tray/menu bar once
-   it's ready.
+2. Download and install Docker Desktop for your computer (choose Windows
+   or Mac -- if Mac, and you're not sure if it's "Apple Silicon" or
+   "Intel", the download page usually detects this for you automatically).
+3. While installing, you may see:
+   - A popup asking for permission ("Do you want to allow this app to
+     make changes to your device?") -- click Yes. This is your computer
+     asking permission to install something, which is normal.
+   - A prompt to restart your computer -- if this happens, save any open
+     work and restart. After restarting, Docker Desktop should open on
+     its own, or you can open it from your Start Menu / Applications
+     folder.
+4. Open Docker Desktop after installing it (if it isn't already open),
+   and just leave it running in the background. You'll see a whale icon
+   in your system tray (bottom-right on Windows) or menu bar (top on Mac)
+   once it's ready. It can take a minute or two to fully start the first
+   time -- that's fine, just wait.
 
-You only need to do this once.
+You only need to do this once, ever, on this computer.
 
 
 STEP 2 -- Unzip the project folder
@@ -32,6 +62,10 @@ STEP 2 -- Unzip the project folder
 
 STEP 3 -- Open a terminal in that folder
 --------------------------------------------------------
+A "terminal" is just a plain window where you type commands instead of
+clicking. It looks technical, but you're only ever going to type one line
+into it (Step 4).
+
 Windows:
   1. Open the extracted folder in File Explorer.
   2. Click into the address bar at the top (where the folder path is
@@ -47,14 +81,19 @@ Mac:
 
 STEP 4 -- Start the chatbot
 --------------------------------------------------------
-In the terminal window from Step 3, type this and press Enter:
+In the terminal window from Step 3, paste this and press Enter:
 
     docker compose up -d --build
 
 The FIRST time you run this, it will take a while (10-20 minutes,
 sometimes longer depending on your internet speed) -- it's downloading
-everything the chatbot needs. You'll see a lot of text scroll past; that
-is normal. Just wait for it to finish and return you to the prompt.
+everything the chatbot needs, a few gigabytes in total. You'll see a lot
+of text scroll past very fast; that is completely normal, not an error.
+
+Do not close this window while it's running, and don't worry if it looks
+like nothing is happening for a stretch -- large downloads can go quiet
+for a bit and then continue. Just wait for it to finish and return you to
+a normal-looking prompt (a blinking cursor with no more new text).
 
 Every time AFTER the first, this same command starts much faster (usually
 under a minute).
@@ -62,7 +101,8 @@ under a minute).
 
 STEP 5 -- Open the chatbot in your browser
 --------------------------------------------------------
-Once Step 4 finishes, open your web browser and go to:
+Once Step 4 finishes, open your web browser (Chrome, Edge, Safari --
+whichever you normally use) and go to:
 
     http://localhost:8501
 
@@ -89,26 +129,39 @@ When you're done, go back to the terminal window and type:
 
 This stops it. Your computer is free to use normally again. To start it
 back up later, just repeat Step 4 (it will be fast this time) and Step 5.
+You do NOT need to unzip the folder again or repeat Step 1.
 
 
 TROUBLESHOOTING
 --------------------------------------------------------
+A window popped up asking to restart my computer (during Step 1)
+  -> This is normal for Docker's setup. Save any open work, restart, then
+     continue from where you left off -- Docker Desktop usually reopens
+     itself after restarting.
+
+A window popped up asking for a password or permission
+  -> This is your computer's own security check asking if it's OK to
+     install/run something -- click Yes/Allow. It is expected, not a sign
+     that something is wrong.
+
 "docker: command not found" or similar error
-  -> Docker Desktop isn't installed, or isn't running. Open Docker
+  -> Docker Desktop isn't installed, or isn't running yet. Open Docker
      Desktop from your Start Menu / Applications folder and wait for the
-     whale icon to show it's ready, then try Step 4 again.
+     whale icon to show it's ready (this can take a minute or two after
+     opening it), then try Step 4 again.
 
 The page at localhost:8501 won't load
   -> Give it a little more time after Step 4 finishes -- the chatbot can
      take 10-30 seconds to fully start even after the command returns.
      If it still won't load after a minute, close the terminal, open a
-     new one in the same folder, and run "docker compose up -d --build"
-     again.
+     new one in the same folder (Step 3), and run "docker compose up -d
+     --build" again.
 
 Step 4 fails partway through with a download/network error
   -> This is usually just a temporary internet hiccup during a large
      download. Simply run the exact same command again -- it will pick
      up faster the second time since some parts are already downloaded.
+     This is completely safe to do as many times as needed.
 
 Everything feels very slow
   -> Open Docker Desktop, go to Settings (gear icon) -> Resources, and
@@ -116,6 +169,14 @@ Everything feels very slow
      more if your computer has it to spare). Increasing this can speed
      things up noticeably.
 
-Still stuck?
-  -> Contact whoever sent you this project with a screenshot of what
-     you're seeing.
+A message mentions "WSL2" or "virtualization" during Docker's install
+  -> Docker Desktop usually fixes this itself and asks you to restart --
+     just follow whatever it suggests on screen and restart when asked.
+     If it still won't proceed after that, this is the one thing worth
+     a screenshot to whoever sent you this project, as it depends on a
+     setting specific to your computer.
+
+Still stuck on anything at all?
+  -> Take a screenshot of exactly what you're seeing (the whole window,
+     not just part of it) and send it to whoever sent you this project.
+     There is no need to try to fix it yourself first.
