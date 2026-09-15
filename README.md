@@ -95,10 +95,32 @@ This is a genuine end-to-end implementation of every component the research
 brief describes -- not a stub. Concretely, today, with zero paid
 infrastructure:
 
-- The full data pipeline runs on a **29-dialogue hand-authored seed corpus**
-  (`data/authored/dialogues.jsonl`, ~116 turns across the 4 in-scope
-  domains) -- not the target 3,000-5,000 turns, which needs a pool of real
-  Nigerian code-switching contributors this environment doesn't have.
+- The full data pipeline runs on a **797-dialogue authored corpus** (3,188
+  turns across the 4 in-scope domains: greetings, qa, customer_support,
+  everyday_chat), split across two files under `data/authored/`:
+  - `dialogues.jsonl` -- the original **29-dialogue hand-authored seed**
+    (~116 turns, contributor ids `c1`-`c4`), written by hand
+    (`scripts/author_seed_dialogues.py`).
+  - `dialogues_synthetic.jsonl` -- a **768-dialogue script-generated batch**
+    (~3,072 turns, contributor ids `synth_c1`-`synth_c4`, kept in a
+    deliberately distinct id namespace for traceable provenance), produced
+    by `scripts/generate_synthetic_dialogues.py` from ~192 distinct
+    hand-written 4-turn scenario skeletons (48 per domain) each rendered
+    under 4 orthographic "contributor spelling profiles" (README §6.3:
+    `una`/`unu`, `sabi`/`savvy`, `dey`/`de`, `abeg`/`abeg o`, `wan`/`wan
+    na`/`wanna`, `no wahala`/`no wahala at all`, trailing `-o`/`sha`/`sef`
+    tags) rather than normalized/duplicated text.
+  - **Numerically**, 3,188 turns now sits inside the research brief's
+    target range of 3,000-5,000 conversational turn pairs (§3/§6.3) for the
+    first time. Read that plainly, though: the brief's target implicitly
+    assumes turns collected/authored by "habitual Nigerian code-switchers"
+    (§6.3) -- a pool of real, distinct human contributors. ~97% of this
+    corpus's turns are instead one script's templated output authored by
+    an AI assistant, not organically collected from many real people, so
+    it should not be read as satisfying the brief's diversity intent even
+    though it now clears the numeric target. Scaling the **real-contributor**
+    portion of the dataset remains a staffing question, not a missing-code
+    one.
 - `src/data_pipeline/sources/{naijasenti,afrisenti,flores200}.py` are real
   loaders against the actual public Hugging Face datasets named in the
   research brief. They degrade gracefully (log a warning, return no data)
@@ -136,7 +158,11 @@ infrastructure:
   unchanged.
 
 In short: every deliverable in the research brief has real, runnable code
-behind it, exercised end-to-end on a small seed dataset. Scaling to the
-brief's full target (3-5k authored+curated turns, a real GPU fine-tune,
-live commercial baselines, a real human-rater study) is an infrastructure
-and staffing question, not a missing-code question.
+behind it, exercised end-to-end on a dataset that now clears the brief's
+numeric 3,000-5,000 turn target (3,188 turns) -- though, as noted above,
+only ~3% of those turns are hand-authored by a person; the rest is one
+script's templated output, not the brief's intended pool of real habitual
+Nigerian code-switchers. Scaling to a real-contributor-authored dataset at
+this size, a real GPU fine-tune, live commercial baselines, and a real
+human-rater study remain an infrastructure and staffing question, not a
+missing-code question.
