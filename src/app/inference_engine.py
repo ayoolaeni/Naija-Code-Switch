@@ -11,10 +11,20 @@ import os
 import random
 import re
 from abc import ABC, abstractmethod
+from pathlib import Path
 
 from dotenv import load_dotenv
 
-load_dotenv()
+# Explicit path, not load_dotenv()'s default stack-inspection search: under
+# `streamlit run`, the script is exec'd rather than imported normally, which
+# breaks python-dotenv's "walk up from the caller's file" heuristic -- it
+# silently finds no .env and loads nothing, no error, with no indication why.
+# override=True: .env is the source of truth for this app's config, so it
+# also wins over any stray shell-level env var left over from an earlier
+# experiment (e.g. a leftover `$env:INFERENCE_BACKEND=""` typed into a
+# terminal directly).
+_ENV_PATH = Path(__file__).resolve().parents[2] / ".env"
+load_dotenv(_ENV_PATH, override=True)
 
 
 class Backend(ABC):
