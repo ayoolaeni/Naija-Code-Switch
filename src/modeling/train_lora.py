@@ -181,9 +181,10 @@ def run(config: dict, smoke_test: bool = False):
 
 def _check_verbatim_reproduction(model, tokenizer, examples):
     model.eval()
+    device = next(model.parameters()).device
     for ex in examples:
         prompt_text, _ = format_prompt_and_target(tokenizer, ex)
-        inputs = tokenizer(prompt_text, return_tensors="pt", add_special_tokens=False)
+        inputs = tokenizer(prompt_text, return_tensors="pt", add_special_tokens=False).to(device)
         with torch.no_grad():
             out = model.generate(**inputs, max_new_tokens=32, do_sample=False)
         generated = tokenizer.decode(out[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True)
