@@ -147,6 +147,7 @@ def run(config: dict, smoke_test: bool = False):
         eval_strategy="steps" if (smoke_test and val_ds) else ("epoch" if val_ds else "no"),
         eval_steps=1 if smoke_test else None,
         save_strategy="no" if smoke_test else "epoch",
+        save_total_limit=1,
         load_best_model_at_end=not smoke_test and val_ds is not None,
         metric_for_best_model="eval_loss" if val_ds else None,
         report_to=[],
