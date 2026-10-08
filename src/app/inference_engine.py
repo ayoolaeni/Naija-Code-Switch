@@ -35,6 +35,12 @@ class Backend(ABC):
         """`messages`: [{"role": "system"|"user"|"assistant", "content": str}, ...]"""
         ...
 
+    def generate_stream(self, messages: list[dict], **gen_params):
+        """Default: no real streaming, just yields the complete response
+        once it's ready. Backends that can actually stream tokens (e.g.
+        LocalTransformersBackend) override this for a snappier UI."""
+        yield self.generate(messages, **gen_params)
+
 
 class HFInferenceBackend(Backend):
     """Hugging Face Inference API -- the default backend once HF_TOKEN is set."""
@@ -65,14 +71,20 @@ class LocalTransformersBackend(Backend):
         from ..modeling.inference import LocalGenerator
         self._generator = LocalGenerator(base_model_id, lora_adapter_dir)
 
-    def generate(self, messages: list[dict], **gen_params) -> str:
+    def _params(self, gen_params: dict):
         from ..modeling.inference import GenerationParams
-        params = GenerationParams(
-            max_new_tokens=gen_params.get("max_new_tokens", 256),
-            temperature=gen_params.get("temperature", 0.7),
-            top_p=gen_params.get("top_p", 0.9),
+        defaults = GenerationParams()
+        return GenerationParams(
+            max_new_tokens=gen_params.get("max_new_tokens", defaults.max_new_tokens),
+            temperature=gen_params.get("temperature", defaults.temperature),
+            top_p=gen_params.get("top_p", defaults.top_p),
         )
-        return self._generator.generate(messages, params)
+
+    def generate(self, messages: list[dict], **gen_params) -> str:
+        return self._generator.generate(messages, self._params(gen_params))
+
+    def generate_stream(self, messages: list[dict], **gen_params):
+        yield from self._generator.generate_stream(messages, self._params(gen_params))
 
 
 class MockBackend(Backend):

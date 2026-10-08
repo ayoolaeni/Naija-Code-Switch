@@ -62,12 +62,14 @@ if user_input:
 
     messages = dm.build_messages()
     with st.chat_message("assistant"):
-        with st.spinner("..."):
-            try:
-                response = backend.generate(messages)
-            except Exception as e:  # noqa: BLE001 - surface backend errors in the UI
-                response = f"(backend error: {e})"
-        st.markdown(response)
+        try:
+            # st.write_stream renders chunks as they arrive (real token-by-
+            # token streaming for the local backend, see inference.py) and
+            # returns the fully assembled string once the generator ends.
+            response = st.write_stream(backend.generate_stream(messages))
+        except Exception as e:  # noqa: BLE001 - surface backend errors in the UI
+            response = f"(backend error: {e})"
+            st.markdown(response)
 
     dm.add_assistant_turn(response)
     st.session_state.logger.log_exchange(user_input, response, backend.name)
