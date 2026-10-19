@@ -34,6 +34,7 @@ if "logger" not in st.session_state:
 
 backend = st.session_state.backend
 dm: DialogueManager = st.session_state.dialogue_manager
+logger = st.session_state.logger
 
 with st.sidebar:
     st.subheader("Backend")
@@ -45,7 +46,7 @@ with st.sidebar:
             "Add HF_TOKEN to .env to get live model responses."
         )
     st.subheader("Session")
-    st.write(f"`{st.session_state.logger.session_id[:8]}`")
+    st.write(f"`{logger.session_id[:8]}`")
     if st.button("Reset conversation"):
         dm.reset()
         st.rerun()
@@ -72,4 +73,13 @@ if user_input:
             st.markdown(response)
 
     dm.add_assistant_turn(response)
-    st.session_state.logger.log_exchange(user_input, response, backend.name)
+    try:
+        # Logging is for traceability, not core to the chat working -- a
+        # slow generation can outlast the browser's websocket connection,
+        # and if it reconnects mid-turn Streamlit can hand back a session
+        # state that's missing things set up earlier in this same script
+        # run. That must never take the already-delivered reply down with
+        # it, so failure here is swallowed rather than surfaced as a crash.
+        logger.log_exchange(user_input, response, backend.name)
+    except Exception:  # noqa: BLE001
+        pass
