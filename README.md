@@ -173,8 +173,28 @@ this working, in case they resurface:
   `.venv/Scripts/streamlit.exe run src/app/ui.py` (Git Bash), or activate
   the venv first.
 - **No GPU means slow, not broken.** CPU generation for a 1.5B model
-  routinely takes tens of seconds to a couple of minutes per reply. A long
-  spinner is expected; it is not evidence something is wrong.
+  takes real time. What `src/modeling/inference.py` does about it, each
+  measured on a 2-core/4-thread laptop CPU:
+  - **float32 instead of bfloat16** when >=8GB is free (`LOCAL_DTYPE`
+    overrides). transformers 5.x defaults to the checkpoint's bfloat16,
+    which CPUs without native bf16 support run ~4x slower; below 8GB free
+    it stays bfloat16 (~3GB vs ~6GB) rather than risk an OOM kill.
+  - **LoRA merged into the base weights** at load (`merge_and_unload`):
+    identical outputs, no per-step adapter overhead.
+  - **System-prompt KV cache reused** across requests (`prime()`): the
+    fixed few-shot system prompt was most of the time-to-first-token.
+    Together these took a short reply from ~60s to first word / ~74s total
+    to ~5s / ~17s.
+  - **One generation at a time, newest wins**: streaming runs `generate()`
+    in a background thread, so a reply abandoned by a rerun/refresh kept
+    running and competing for the CPU with the next one. A new request
+    now cancels the previous one via a stopping criterion.
+  - PyTorch's default thread count is left alone -- forcing it to
+    `os.cpu_count()` (hyperthreads included) measured ~20% slower.
+
+  In the UI, the model is loaded once per process (`st.cache_resource`)
+  rather than per browser session, and the input box is disabled while a
+  reply is being generated so messages can't pile up behind a slow one.
 
 (Under the hood: `src/app/inference_engine.py` loads `.env` via an
 explicit path derived from `Path(__file__)`, not python-dotenv's default

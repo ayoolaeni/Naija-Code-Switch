@@ -110,15 +110,38 @@ You should see "Naija-Switch" with a chat box. Type a message and press
 Enter or the send button.
 
 
-IMPORTANT -- responses take a little while
+IMPORTANT -- what to expect while it works
 --------------------------------------------------------
 This chatbot runs entirely on your own computer (nothing is sent to any
 outside server once it's running), which is great for privacy, but it
-means your computer's own processor is doing all the work. Expect each
-reply to take anywhere from about 20 seconds to a couple of minutes,
-especially the very first message after starting it. This is completely
-normal -- please just wait for the reply rather than clicking again or
-closing the window.
+means your computer's own processor is doing all the work.
+
+- When you first open the page after starting it, you'll see "Starting
+  up the chatbot..." for a few minutes. That's the chatbot loading --
+  it only happens once each time you start it. Just wait.
+- After you send a message, you'll see "Thinking..." and the typing box
+  turns grey. That's normal: it's writing the reply, and the box comes
+  back as soon as the reply is finished. A reply usually takes somewhere
+  from about 10 seconds to a minute, depending on your computer.
+- You don't need to click anything or send the message again -- the
+  words will start appearing on their own.
+
+In the left-hand panel, under "Backend", you'll see either "CPU,
+float32" (the faster mode) or "CPU, bfloat16" (a slower mode it uses
+automatically when the computer doesn't have much free memory). If it
+says bfloat16 and replies feel slow, see "Everything feels very slow"
+under TROUBLESHOOTING below.
+
+
+INSTALLING AN UPDATED VERSION
+--------------------------------------------------------
+If you've been sent a newer zip of this project:
+1. In the terminal, in your OLD folder, type "docker compose down" and
+   press Enter (this stops the old version).
+2. Delete the old folder, then unzip the new one (Step 2 above).
+3. Do Step 3, Step 4 and Step 5 again from the new folder.
+The large download from the first time is kept, so this is much faster
+than the first install -- you won't download everything again.
 
 
 STOPPING THE CHATBOT
@@ -163,11 +186,23 @@ Step 4 fails partway through with a download/network error
      up faster the second time since some parts are already downloaded.
      This is completely safe to do as many times as needed.
 
-Everything feels very slow
-  -> Open Docker Desktop, go to Settings (gear icon) -> Resources, and
-     make sure it's allowed a reasonable amount of memory (at least 4GB,
-     more if your computer has it to spare). Increasing this can speed
-     things up noticeably.
+Everything feels very slow (or the left panel says "bfloat16")
+  -> The chatbot picks its faster mode only when your computer has enough
+     free memory at the moment it starts. To give it the best chance:
+     1. Close other programs you don't need (especially web browsers with
+        lots of tabs open -- keep just one tab for the chatbot).
+     2. In the terminal, type "docker compose down", press Enter, then do
+        Step 4 again and reopen the page.
+     Replies on any computer without a graphics card will never be
+     instant, but this can make a big difference. (On a Mac you can also
+     open Docker Desktop -> Settings -> Resources and give it more
+     memory.)
+
+The typing box stays grey and "Thinking..." never goes away
+  -> Wait at least 2-3 minutes first -- on a slower computer it really
+     can take that long. If it's still stuck after that, click "Reset
+     conversation" in the left panel and send your message again. If
+     that doesn't help, screenshot the whole window and send it over.
 
 A message mentions "WSL2" or "virtualization" during Docker's install
   -> Docker Desktop usually fixes this itself and asks you to restart --

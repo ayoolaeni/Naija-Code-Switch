@@ -1,3 +1,9 @@
+# Fixed project name: without it Docker derives the name from the folder,
+# so unzipping an update into e.g. "Naija-Switch (1)" would create a second
+# project -- re-downloading the ~3GB model into a new volume and clashing
+# with the old container still holding port 8501.
+name: naija-switch
+
 services:
   naija-switch:
     build: .

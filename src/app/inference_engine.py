@@ -29,6 +29,7 @@ load_dotenv(_ENV_PATH, override=True)
 
 class Backend(ABC):
     name: str = "base"
+    detail: str = ""  # short human-readable runtime info, shown in the UI sidebar
 
     @abstractmethod
     def generate(self, messages: list[dict], **gen_params) -> str:
@@ -69,7 +70,14 @@ class LocalTransformersBackend(Backend):
 
     def __init__(self, base_model_id: str, lora_adapter_dir: str | None = None):
         from ..modeling.inference import LocalGenerator
+        from ..modeling.prompt_design import get_frozen_system_prompt
         self._generator = LocalGenerator(base_model_id, lora_adapter_dir)
+        try:
+            # Same frozen prompt the DialogueManager prepends to every request.
+            self._generator.prime(get_frozen_system_prompt())
+        except Exception:  # noqa: BLE001 - an optimisation; generation works without it
+            pass
+        self.detail = f"{self._generator.device.upper()}, {self._generator.dtype_name}"
 
     def _params(self, gen_params: dict):
         from ..modeling.inference import GenerationParams
